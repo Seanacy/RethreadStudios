@@ -209,17 +209,17 @@ export default function CollectionDetailPage() {
                   }
                 }
                 if (urls.length > 0) {
-                  const existing = (collection as unknown as Record<string, unknown>).mood_board as string[] || [];
+                  const existing = collection.mood_board || [];
                   const updated = [...existing, ...urls];
                   await supabase.from("rs_collections").update({ mood_board: updated }).eq("id", collection.id);
-                  setCollection({ ...collection, mood_board: updated } as unknown as Collection);
+                  setCollection({ ...collection, mood_board: updated });
                 }
               }}
               className="w-full text-sm text-[#888] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#1e1e1e] file:text-[#e8d5b7] hover:file:bg-[#252525] mb-4"
             />
-            {(collection as unknown as Record<string, unknown>).mood_board && ((collection as unknown as Record<string, unknown>).mood_board as string[]).length > 0 && (
+            {collection.mood_board && collection.mood_board.length > 0 && (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                {((collection as unknown as Record<string, unknown>).mood_board as string[]).map((img, i) => (
+                {collection.mood_board.map((img: string, i: number) => (
                   <div key={i} className="aspect-square rounded-lg overflow-hidden bg-[#0a0a0a]">
                     <img src={img} alt={`Vision ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
