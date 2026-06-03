@@ -30,6 +30,8 @@ export default function StudioPieceDetailPage() {
   const router = useRouter();
   const [piece, setPiece] = useState<Piece | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
+  const [qrSvg, setQrSvg] = useState<string | null>(null);
+  const [qrCollectionName, setQrCollectionName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,6 +49,8 @@ export default function StudioPieceDetailPage() {
         const res = await fetch(`/api/qr?artist=${(artist as { username: string }).username}&piece=${id}`);
         const qr = await res.json();
         setQrImage(qr.qr_image);
+        setQrSvg(qr.qr_svg);
+        setQrCollectionName(qr.collection_name);
       }
 
       setLoading(false);
@@ -149,16 +153,28 @@ export default function StudioPieceDetailPage() {
             {/* QR Code */}
             <div className="bg-[#141414] border border-[#1e1e1e] rounded-xl p-5">
               <h3 className="text-sm font-bold text-white mb-3">QR Tag</h3>
-              <p className="text-xs text-[#888] mb-4">Print this and attach it to the garment. Anyone who scans it finds your profile.</p>
-              {qrImage ? (
+              <p className="text-xs text-[#888] mb-4">Print this and attach it to the garment. Anyone who scans it sees this piece and the collection it belongs to.</p>
+              {qrSvg ? (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="bg-white rounded-lg p-3">
-                    <img src={qrImage} alt="QR Code" className="w-32 h-32" />
+                  <div dangerouslySetInnerHTML={{ __html: qrSvg }} className="w-48" />
+                  {qrCollectionName && (
+                    <span className="text-xs text-[#e8d5b7]">Collection: {qrCollectionName}</span>
+                  )}
+                  <div className="flex gap-3">
+                    <a href={qrImage || "#"} download={`rethread-qr-${piece.id.slice(0, 8)}.png`}
+                      className="text-xs text-[#e8d5b7] hover:text-[#d4c0a0]">
+                      Download PNG
+                    </a>
+                    <button onClick={() => {
+                      const blob = new Blob([qrSvg], { type: "image/svg+xml" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url; a.download = `rethread-qr-${piece.id.slice(0, 8)}.svg`;
+                      a.click(); URL.revokeObjectURL(url);
+                    }} className="text-xs text-[#e8d5b7] hover:text-[#d4c0a0]">
+                      Download SVG
+                    </button>
                   </div>
-                  <a href={qrImage} download={`rethread-qr-${piece.id.slice(0, 8)}.png`}
-                    className="text-xs text-[#e8d5b7] hover:text-[#d4c0a0]">
-                    Download QR
-                  </a>
                 </div>
               ) : (
                 <div className="text-center py-4 text-[#555] text-xs">Generating QR...</div>
